@@ -1,0 +1,86 @@
+diff -r client/components/activities.jsx mergingDir/beards-of-zeus/client/components/activities.jsx
+22d21
+<     var that = this;
+28,29c27,28
+<                   <Activity user_id={that.props.user_id} avatar={activity.avatar}  owner={activity.owner} description={activity.description} title={activity.title} 
+<                   location={activity.location} keywords={activity.keywords} id={activity.id} />
+---
+>                   <Activity avatar={activity.avatar}  user={activity.user} description={activity.description} title={activity.title} 
+>                   location={activity.location} keywords={activity.keywords}/>
+diff -r client/components/activity.jsx mergingDir/beards-of-zeus/client/components/activity.jsx
+14,18c14
+<               <form action="/data/join" method="post">
+<                 <input type='hidden' name='user_id' value={this.props.user_id}/>
+<                 <input type='hidden' name='activity_id' value={this.props.id}/>
+<                 <button type="submit">Join Activity</button>
+<               </form>
+---
+>               <li><a href="">Share</a></li>
+diff -r client/components/app.jsx mergingDir/beards-of-zeus/client/components/app.jsx
+8c8
+<     this.setState({idToken: this.getIdToken()});
+---
+>     this.setState({idToken: this.getIdToken()})
+diff -r client/components/loggedIn.jsx mergingDir/beards-of-zeus/client/components/loggedIn.jsx
+46c46
+< });
+\ No newline at end of file
+---
+> });
+diff -r client/components/user.jsx mergingDir/beards-of-zeus/client/components/user.jsx
+2a3,24
+> 
+>   componentDidMount: function(){
+>     this.getActivities();
+>   },
+> 
+>   getInitialState: function(){
+>     return {
+>       activityList: [],
+>     }
+>   },
+> 
+>   getActivities: function(){
+>     $.getJSON('/data/userActivities', {userID: this.props.user.user_id}).done(function(activities){
+>        this.setState({activityList: activities});
+>     }.bind(this));
+>   },
+> 
+>   toggle: function(activityId){
+>     console.log(activityId);
+>     $.post('/data/toggle', {activityId: activityId});
+>   },
+> 
+3a26
+>     var that = this;
+9,26c32,42
+<               <section className="section">
+<                 <h5 className="title"><a href="#">Section 1</a></h5>
+<               </section>
+<               <section className="section">
+<                 <h5 className="title"><a href="#">Section 2</a></h5>
+<               </section>
+<               <section className="section">
+<                 <h5 className="title"><a href="#">Section 3</a></h5>
+<               </section>
+<               <section className="section">
+<                 <h5 className="title"><a href="#">Section 4</a></h5>
+<               </section>
+<               <section className="section">
+<                 <h5 className="title"><a href="#">Section 5</a></h5>
+<               </section>
+<               <section className="section">
+<                 <h5 className="title"><a href="#">Section 6</a></h5>
+<               </section>
+---
+>                { this.state.activityList.map( function(activity) {
+>                   return (
+>                     <div key={activity.id}>
+>                       <section className="section">
+>                       <h5 className="title"><a href="#">{activity.title}</a>
+>                       <input type='checkbox' onChange={that.toggle.bind(null, activity.id)}/></h5>
+>                       </section>
+>                     </div>
+>                   )
+>                 })
+>               }             

@@ -1,0 +1,117 @@
+52c52
+<       ownerId: req.body.user_id
+---
+>       active: true
+54c54,58
+<     .save();
+---
+>     .save()
+>     .then(function(activity){
+>       if(user)
+>         user.addActivity(activity); // links user to activity in junction table
+>     });
+62,77c66,79
+<   //query for all activities for which the user is NOT an owner
+<   Activity.findAll({
+<     where:{
+<       ownerIdUserId: {
+<         ne : req.query.userID
+<       }
+<     }
+<   }).then(function(activities){
+<     //add each activity to a list
+<     activities.reduce(function(list, activity){
+<       //access the activity owner's information
+<       User.find({where: {userId: activity.ownerIdUserId}})
+<         .then(function(user){
+<           //push activity information to list
+<           list.push({id: activity.id, avatar: user.picture, 
+<             owner: user.name, description: activity.description, title: activity.title,
+---
+>   Activity.findAll({})
+>   .then(function(activities){
+>     activities.reduce(function(list, activity){ 
+>       activity.getUsers({
+>         where : {
+>           userId : {
+>             ne : req.query.userID
+>           }//userId
+>         }//where
+>       })//getUsers
+>       .then(function(user){
+>         if(user.length > 0){
+>           list.push({id: activity.id, avatar: user[0].picture, 
+>             user: user[0].name, description: activity.description, title: activity.title,
+80,83c82,87
+<           //once all activities have been added, send as response
+<           if(iterations === activities.length)
+<             { res.send(list); }
+<           });//function(user)
+---
+>         }else{
+>           iterations++;
+>         }
+>         if(iterations === activities.length)
+>           { res.send(list); }
+>       }); //then(function(user))
+85,86c89,90
+<     }, []);//reduce
+<   });//function(activities)
+---
+>     }, []); //reduce
+>   });//then(function(activities))
+89c93
+< app.post('/data/join', function(req, res){
+---
+> app.get('/data/userActivities', function(req, res){
+91,99c95,133
+<   User.find({where: {userId: req.body.user_id}})
+<     .then(function(user){
+<       Activity.find({where: {id: req.body.activity_id}})
+<       .then(function(activity){
+<         user.addActivity(activity);
+<       });
+<     });
+<   res.redirect('/');
+< });
+---
+>   var iterations = 0;
+>   Activity.findAll({})
+>   .then(function(activities){
+>     activities.reduce(function(list, activity){ 
+>       activity.getUsers({
+>         where : {
+>           userId : req.query.userID //userId
+>         }//where
+>       })//getUsers
+>       .then(function(user){
+>         if(user.length > 0){
+>           list.push({id: activity.id, avatar: user[0].picture, 
+>             user: user[0].name, description: activity.description, title: activity.title,
+>             keywords: activity.keywords, location: activity.location});
+>           iterations++;
+>         }else{
+>           iterations++;
+>         }
+>         if(iterations === activities.length)
+>           { res.send(list); }
+>       }); //then(function(user))
+>       return list;
+>     }, []); //reduce
+>   });//then(function(activities))
+> });//app.get
+> 
+> app.post('/data/toggle', function(req, res){
+>   'use strict';
+>   console.log(req.body.activityId);
+>   Activity.find({
+>     where: {
+>       id: req.body.activityId
+>     }
+>   })
+>   .then(function(activity){
+>     activity.updateAttributes({active: !activity.get('active')});
+>   })
+>   res.sendStatus(200);
+> });
+\ No newline at end of file
